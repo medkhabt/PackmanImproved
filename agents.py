@@ -72,6 +72,9 @@ class RandomAgent(Agent):
         random.seed(datetime.now()) # random.seed(), fix l'enchainement du random numbers. 
         #here we have a variant argument, which means we have different random numbers each
         #time. 
+        
+        #Overriding the program of the Agent Class, here it seems like an 
+        #attribute but still it is a function so technically it's a method. 
         self.program = lambda percept: random.choice(actions)
 
 
@@ -237,8 +240,13 @@ class ReflexVacuumAgent(Agent):
         self.bump=False
         self.heading=headings[0]
         #**************************************
-        def program( percept  ):
-            raise Exception("lkjdsaf")
+        def program( percept ):
+            status = percept[0]
+            bump= percept[1]
+            if status == 'Dirty' :
+                return 'Suck'
+            else:
+                return random.choice(['TurnRight', 'TurnLeft', 'Forward', 'Suck' ])
         self.program = program
 
 
@@ -253,7 +261,20 @@ class ModelBasedVacuumAgent(Agent):
         self.model = []
         #******************************8
         def program( percept  ):
-            raise Exception("you code here!")
+            location = percept[0] 
+            status = percept[1]
+            if status == 'Bump':
+                obstacleLocation = vector_add(self.heading, location)
+                model.append(obstacleLocation)
+            if location == 'Dirty':
+                return 'Suck'
+            while(True):
+                action = random.choice(['TurnRight', 'TurnLeft', 'Forward'])
+                if action == 'Forward':
+                    newLocation = vector_add(self.heading, location)
+            if not newLocation in self.model:
+                return action
+            else : return action
         self.program = program
 
 class VacuumEnvironment(XYEnvironment):
@@ -417,18 +438,19 @@ def vacuumEnv4x4():
 # ==============================================================================
 # 
 env =vacuumEnv4x4()
-env.add_object(TraceAgent(RandomVacuumAgent()),  (1,1))
-# #env.add_object(TraceAgent(ReflexVacuumAgent()),  (1,1))
-# env.add_object(TraceAgent(ModelBasedVacuumAgent()),  (1,1))
+#env.add_object(TraceAgent(RandomVacuumAgent()),  (1,1))
+#env.add_object(TraceAgent(ReflexVacuumAgent()),  (1,1))
+env.add_object(TraceAgent(ModelBasedVacuumAgent()),  (1,1))
 # # 
 PRINT_STEP = True
 printEnv(env)
 # #  
-STEP_PER_STEP = True 
+STEP_PER_STEP = True  
 env.run()
 printEnv(env)
 # # ==============================================================================
 PRINT_STEP = False
+
 #  
 #
 
